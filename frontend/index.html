@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Lab 6</title>
+        <style>
+            body {
+                background-color: #e8a5de;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0px auto;
+                padding: 0px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                border-bottom: 1px solid #ddd;
+                text-align: center;
+                padding: 15px;
+            }
+            tr:hover {
+                background-color: coral;
+            }
+            form {
+                width: 100%;
+                display: none;
+            }
+            .container-fuild {
+                width: 80%;
+                margin: 0px auto;
+                text-align: center;
+            }
+            #btn,
+            #btn-add {
+                border-radius: 20px;
+                margin: 20px auto;
+            }
+        </style>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+            integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+            crossorigin="anonymous"
+        />
+    </head>
+    <body>
+        <div class="container-fuild">
+            <button class="btn-success" id="btn">show all products</button>
+            <div class="card">
+                <table id="table-product">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Product Price</th>
+                            <th>Product Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+            <button class="btn-success" id="btn-add">Add product</button>
+            <form id="postForm">
+                <div class="form-group">
+                    <label for="">Product's Name</label>
+                    <input
+                        id="name_id"
+                        type="text"
+                        name="prd_name"
+                        class="form-control"
+                        required
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="">Product's Price</label>
+                    <input
+                        id="price_id"
+                        type="number"
+                        name="price"
+                        class="form-control"
+                        required
+                    />
+                </div>
+                <div class="form-group">
+                    <label for="">Product's description</label>
+                    <input
+                        id="description_id"
+                        type="text"
+                        name="description"
+                        class="form-control"
+                        required
+                    />
+                </div>
+                <button name="sbm" class="btn btn-success" type="submit">
+                    Add
+                </button>
+            </form>
+        </div>
+
+        <script>
+            document
+                .getElementById("btn")
+                .addEventListener("click", getAllProducts);
+            document
+                .getElementById("btn-add")
+                .addEventListener("click", showForm);
+            document
+                .getElementById("postForm")
+                .addEventListener("submit", postProduct);
+
+            function showForm() {
+                var dpl = document.getElementById("postForm").style.display;
+                if (dpl == "none") {
+                    document.getElementById("postForm").style.display = "block";
+                } else {
+                    document.getElementById("postForm").style.display = "none";
+                }
+            }
+            function getAllProducts(e) {
+                e.preventDefault();
+                var xhr = new XMLHttpRequest();
+                xhr.open(
+                    "GET",
+                    "http://localhost:8080/lab6/backend/API/list.php",
+                    true
+                );
+                // xhr.setRequestHeader("Content-type", "application/json");
+                xhr.onload = function () {
+                    var products = JSON.parse(xhr.responseText);
+                    if (xhr.readyState == 4 && xhr.status == "200") {
+                        var output = "";
+                        for (var i in products) {
+                            output += `
+                            <tr>
+                                <td>${products[i].name}</td>
+                                <td>${products[i].price}</td>
+                                <td>${products[i].description}</td>
+                            </tr>
+                            `;
+                        }
+                        document.getElementById("table-body").innerHTML =
+                            output;
+                    } else {
+                        console.error(products);
+                    }
+                };
+                xhr.send();
+            }
+            function postProduct(e) {
+                e.preventDefault();
+
+                var xhr = new XMLHttpRequest();
+                xhr.open(
+                    "POST",
+                    "http://localhost:8080/lab6/backend/API/create.php",
+                    true
+                );
+                xhr.setRequestHeader("Content-type", "application/json");
+                xhr.onload = function () {
+                    console.log(xhr.responseText);
+                };
+                var name = document.getElementById("name_id");
+                var price = document.getElementById("price_id");
+                var description = document.getElementById("description_id");
+                var params = JSON.stringify({
+                    name: name.value,
+                    price: price.value,
+                    description: description.value,
+                });
+                xhr.send(params);
+                getAllProducts(e);
+            }
+        </script>
+    </body>
+</html>
